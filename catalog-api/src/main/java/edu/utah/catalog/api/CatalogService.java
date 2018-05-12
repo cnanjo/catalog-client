@@ -107,4 +107,8 @@ public class CatalogService {
                 .returnBundle(Bundle.class)
                 .execute();
     }
+
+    public EntryDefinition getEntryDefinitionById(String entryUrl) {
+        return client.read().resource(EntryDefinition.class).withUrl(entryUrl).execute();
+    }
 }

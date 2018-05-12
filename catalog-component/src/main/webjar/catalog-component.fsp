@@ -54,6 +54,7 @@
                     </row>
                 </rows>
             </grid>
+            <div name="catalogSearchResultGridDiv"></div>
         </tab>
     </tabview>
 </catalogcomponent>

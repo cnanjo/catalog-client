@@ -7,6 +7,7 @@ import org.fujion.annotation.EventHandler;
 import org.fujion.annotation.WiredComponent;
 import org.fujion.component.*;
 import org.fujion.event.Event;
+import org.fujion.event.IEventListener;
 import org.hl7.fhir.r4.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -54,6 +55,9 @@ public class CatalogController implements IAutoWired {
 
     @WiredComponent
     private Tab catalogEntryBrowserTab;
+
+    @WiredComponent
+    private Div catalogSearchResultGridDiv;
 
     public CatalogController() {
         System.out.println("################################## INITIALIZED");
@@ -262,7 +266,7 @@ public class CatalogController implements IAutoWired {
                         });
                         EntryDefinition selectedEntry = (EntryDefinition)bundledResourceIndex.get(entryUrl);
                         System.out.println(selectedEntry);
-                        Tab entryDefinitionTab = new Tab("Entry Details - " + selectedEntry.getClassification().get(0).getText());
+                        Tab entryDefinitionTab = new Tab("Entry Details - " + selectedEntry.getClassification().get(0).getCodingFirstRep().getDisplay());
                         catalogTabView.addChild(entryDefinitionTab);
                         Div entryDiv = populateEntryDetails(selectedEntry,bundledResourceIndex);
                         entryDefinitionTab.addChild(entryDiv);
@@ -335,7 +339,8 @@ public class CatalogController implements IAutoWired {
         parameters.put(CatalogService.SEARCH_PARAMETER_CLASSIFICATION, tbClassificationDisplay.getValue());
         Bundle bundle = catalogService.searchEntries(catalogId, parameters);
         Grid grid = buildEntryDefinitionGrid(catalogId, bundle);
-        catalogEntryBrowserTab.addChild(grid);
+        catalogSearchResultGridDiv.destroyChildren();
+        catalogSearchResultGridDiv.addChild(grid);
     }
 
     /**
@@ -350,7 +355,8 @@ public class CatalogController implements IAutoWired {
         parameters.put(CatalogService.SEARCH_PARAMETER_REFERENCED_ITEM,tbActivityDefinitionName.getValue());
         Bundle bundle = catalogService.searchEntries(catalogId, parameters);
         Grid grid = buildEntryDefinitionGrid(catalogId, bundle);
-        catalogEntryBrowserTab.addChild(grid);
+        catalogSearchResultGridDiv.destroyChildren();
+        catalogSearchResultGridDiv.addChild(grid);
     }
 
     protected void buildPurposeComboBox(Combobox purposeCombo) {
@@ -423,7 +429,9 @@ public class CatalogController implements IAutoWired {
         urlDiv.addClass("entry-detail-url");
         details.addChild(urlDiv);
         urlDiv.addChild(buildNvpNameLabel("Entry URL:"));
-        urlDiv.addChild(buildNvpValueLabel(entryDefinition.getId()));
+        //urlDiv.addChild(buildNvpValueLabel(entryDefinition.getId()));
+        Hyperlink entryLink = buildEntryDefinitionHyperlink(entryDefinition);
+        urlDiv.addChild(entryLink);
         Div typeDiv = new Div();
         typeDiv.addClass("entry-detail-type");
         details.addChild(typeDiv);
@@ -481,6 +489,27 @@ public class CatalogController implements IAutoWired {
 
     }
 
+    private Hyperlink buildEntryDefinitionHyperlink(EntryDefinition entryDefinition) {
+        Hyperlink entryLink = new Hyperlink();
+        entryLink.setLabel(entryDefinition.getId());
+        entryLink.addEventListener("click", new IEventListener() {
+            @Override
+            public void onEvent(Event event) {
+                buildEntrySummaryTab(entryDefinition);
+            }
+        });
+        return entryLink;
+    }
+
+    protected void buildEntrySummaryTab(EntryDefinition entryDefinition) {
+        Tab tab = new Tab("Entry Summary");
+        catalogTabView.addChild(tab);
+        tab.setSelected(true);
+        tab.setClosable(true);
+        EntryDefinition entryDefinitionResource = catalogService.getEntryDefinitionById(entryDefinition.getId());
+        tab.addChild(buildEntrySummary(entryDefinitionResource));
+    }
+
     protected Groupbox handleTargetRendering(Div target, Resource targetResource) {
         Groupbox content = new Groupbox();
         if(targetResource instanceof ActivityDefinition) {
@@ -509,6 +538,38 @@ public class CatalogController implements IAutoWired {
             System.out.println("Unknown referenced item");
         }
         return content;
+    }
+
+    public Div buildEntrySummary(EntryDefinition entryDefinition) {
+        Div entrySummaryDiv = new Div();
+        Groupbox groupbox = new Groupbox();
+        entrySummaryDiv.addChild(groupbox);
+        groupbox.setTitle("Summary");
+        groupbox.addClass("search-form-groupbox");
+        groupbox.addChild(buildLabelDiv("Entry ID:", entryDefinition.getId()));
+        groupbox.addChild(buildLabelDiv("Entry Type:", renderCodingAsString(entryDefinition.getType().getCodingFirstRep())));
+        groupbox.addChild(buildLabelDiv("Purpose:", renderCodingAsString(entryDefinition.getPurpose().getCodingFirstRep())));
+        if(entryDefinition.getClassification().size() > 0) {
+            groupbox.addChild(buildLabelDiv("Classification:", renderCodingAsString(entryDefinition.getClassification().get(0).getCodingFirstRep())));
+        }
+        Div referencedItemResourceDiv = new Div();
+        Resource resource = (Resource)entryDefinition.getReferencedItemTarget();
+        if(resource == null) {
+            resource = entryDefinition.getContained().get(0);
+        }
+        if(resource != null) {
+            Groupbox referenceGroupBox = handleTargetRendering(referencedItemResourceDiv, resource);
+            groupbox.addChild(referenceGroupBox);
+            referenceGroupBox.addChild(buildLabelDiv("Referenced Item URL:", entryDefinition.getReferencedItem().getReference()));
+        }
+        entryDefinition.getRelatedEntry().forEach(entryDefinitionRelatedEntryComponent -> {
+            Div relatedEntryDiv = new Div();
+            relatedEntryDiv.addChild(buildLabelDiv("Relationship:", renderCodingAsString(entryDefinitionRelatedEntryComponent.getRelationtype().getCodingFirstRep())));
+            EntryDefinition definition = catalogService.getEntryDefinitionById(entryDefinitionRelatedEntryComponent.getItem().getReference());
+            relatedEntryDiv.addChild(buildEntryDefinitionHyperlink(definition));
+            groupbox.addChild(relatedEntryDiv);
+        });
+        return entrySummaryDiv;
     }
 
     protected String renderCodingAsString(Coding coding) {
