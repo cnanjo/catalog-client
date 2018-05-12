@@ -14,25 +14,9 @@
     <name>Catalog Webapp</name>
 
     <properties>
-        <fujion.version>1.1.0-RC5</fujion.version>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.fujion</groupId>
-            <artifactId>fujion-core</artifactId>
-            <version>${fujion.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.fujion</groupId>
-            <artifactId>fujion-script-groovy</artifactId>
-            <version>${fujion.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.fujion</groupId>
-            <artifactId>fujion-themes</artifactId>
-            <version>${fujion.version}</version>
-        </dependency>
         <dependency>
             <groupId>edu.utah</groupId>
             <artifactId>catalog-component</artifactId>
