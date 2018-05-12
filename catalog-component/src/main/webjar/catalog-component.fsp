@@ -1,0 +1,59 @@
+<catalogcomponent controller="${@catalogController}">
+    <tabview name="catalogTabView" width="100%" height="1000px" tabPosition="TOP">
+        <tab name="catalogBrowserTab" label="Catalog Browser">
+            <div>
+                <grid name="catalogGrid"></grid>
+            </div>
+        </tab>
+        <tab name="catalogEntryBrowserTab" label="Catalog Entry Browser">
+            <grid>
+                <rows>
+                    <row>
+                        <rowcell>
+                            <groupbox class="search-form-groupbox" title="Search 1">
+                                <div>
+                                    <label class="nvp-name-label" label="Catalog"></label>
+                                    <combobox name="cbCatalog1"></combobox>
+                                </div>
+                                <div>
+                                    <label class="nvp-name-label" label="Classification Display"></label>
+                                    <textbox name="tbClassificationDisplay"></textbox>
+                                </div>
+                                <div>
+                                    <label class="nvp-name-label" label="Purpose"></label>
+                                    <combobox name="cbPurpose1"></combobox>
+                                </div>
+                                <div>
+                                    <label class="nvp-name-label" label="Entry Type"></label>
+                                    <combobox name="cbEntryDefType1"></combobox>
+                                </div>
+                                <button name="btnEntrySearch1" label="Search"></button>
+                            </groupbox>
+                        </rowcell>
+                        <rowcell>
+                            <groupbox class="search-form-groupbox" title="Search 2">
+                                <div>
+                                    <label class="nvp-name-label" label="Catalog"></label>
+                                    <combobox name="cbCatalog2"></combobox>
+                                </div>
+                                <div>
+                                    <label class="nvp-name-label" label="Purpose"></label>
+                                    <combobox name="cbPurpose2"></combobox>
+                                </div>
+                                <div>
+                                    <label class="nvp-name-label" label="Entry Type"></label>
+                                    <combobox name="cbEntryDefType2"></combobox>
+                                </div>
+                                <div>
+                                    <label class="nvp-name-label" label="Activity Definition Name"></label>
+                                    <textbox name="tbActivityDefinitionName"></textbox>
+                                </div>
+                                <button name="btnEntrySearch2" label="Search"></button>
+                            </groupbox>
+                        </rowcell>
+                    </row>
+                </rows>
+            </grid>
+        </tab>
+    </tabview>
+</catalogcomponent>

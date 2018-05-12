@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.fujion</groupId>
+        <artifactId>fujion-parent</artifactId>
+        <version>1.1.0-RC5</version>
+    </parent>
+
+    <groupId>edu.utah</groupId>
+    <artifactId>catalog-client</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <name>Catalog Web</name>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>catalog-api</module>
+        <module>catalog-component</module>
+        <module>catalog-web</module>
+    </modules>
+
+    <properties>
+        <fujion.version>1.1.7</fujion.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.fujion</groupId>
+            <artifactId>fujion-test</artifactId>
+            <version>${fujion.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.fujion</groupId>
+            <artifactId>fujion-core</artifactId>
+            <version>${fujion.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.fujion</groupId>
+            <artifactId>fujion-script-groovy</artifactId>
+            <version>${fujion.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.fujion</groupId>
+            <artifactId>fujion-themes</artifactId>
+            <version>${fujion.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.fujion</groupId>
+            <artifactId>fujion-angular-core</artifactId>
+            <version>${fujion.version}</version>
+        </dependency>
+    </dependencies>
+</project>

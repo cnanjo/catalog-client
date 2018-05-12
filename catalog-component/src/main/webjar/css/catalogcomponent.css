@@ -1,0 +1,69 @@
+.entry-div {
+    border-radius: 5px;
+    padding: 5px 5px 5px 5px;
+}
+
+.entry-detail-div {
+    border-radius: 5px;
+    background-color: azure;
+    padding: 5px 5px 5px 25px;
+}
+
+.entry-detail-url .entry-detail-type .entry-detail-classification .entry-detail-purpose .entry-detail-status {
+    border-radius: 5px;
+    padding: 5px 5px 5px 5px;
+}
+
+.entry-detail-target {
+    border-radius: 5px;
+    padding: 5px 5px 5px 5px;
+}
+
+.entry-detail-related-entries {
+    border-radius: 5px;
+    background-color: azure;
+    padding: 5px 5px 5px 20px;
+    height: min-content;
+}
+
+.entry-detail-related-entry {
+    border-radius: 5px;
+    background-color: azure;
+    padding: 5px 5px 5px 25px;
+}
+
+.activity-definition {
+    border-radius: 5px;
+    background-color: azure;
+    padding: 5px 5px 5px 15px;
+}
+
+.specimen-definition {
+    border-radius: 5px;
+    background-color: azure;
+    padding: 5px 5px 5px 15px;
+}
+
+.observation-definition {
+    border-radius: 5px;
+    background-color: azure;
+    padding: 5px 5px 5px 15px;
+}
+
+.catalog-details-group-box {
+    height: 350px;
+}
+
+.nvp-name-label {
+    width: 200px;
+    color: #444444;
+}
+
+.nvp-value-label {
+    width: 400px;
+    font-weight: normal;
+}
+
+.search-form-groupbox {
+    height: min-content;
+}
