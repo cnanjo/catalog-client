@@ -52,11 +52,11 @@
             <artifactId>fujion-script-groovy</artifactId>
             <version>${fujion.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.fujion</groupId>
-            <artifactId>fujion-themes</artifactId>
-            <version>${fujion.version}</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.fujion</groupId>-->
+            <!--<artifactId>fujion-themes</artifactId>-->
+            <!--<version>${fujion.version}</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.fujion</groupId>
             <artifactId>fujion-angular-core</artifactId>
