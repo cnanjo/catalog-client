@@ -77,10 +77,6 @@ public class CatalogController implements IAutoWired {
 
         populateServiceCombo(cbEntryDefType2);
 
-//        populateClassificationCombo();
-//
-//        populateActivityDefinitionNameCombo();
-
         initializeCatalogGrid();
     }
 
@@ -152,28 +148,8 @@ public class CatalogController implements IAutoWired {
             Button viewDetailsBtn = new Button("View Details");
             viewDetailsBtn.setName("viewCatalogDetailsBtn" + composition.getId().hashCode());
             viewDetailsBtn.addEventListener("click", event -> {
-                Row selectedRow = (Row) event.getTarget().getParent().getParent();
-                Rowcell catalogIdCell = (Rowcell)selectedRow.getChildAt(0);
-                Tab tab = new Tab(catalogIdCell.getLabel());
-                tab.setSelected(true);
-                Div content = new Div();
-                tab.addChild(content);
-                Groupbox catalogDetailsGroupbox = populateCatalogDetailsGroupbox(composition);
-                catalogDetailsGroupbox.addClass("catalog-details-group-box");
-                content.addChild(catalogDetailsGroupbox);
-                String catalogIdUnparsed = (String)catalogIdCell.getData();
-                String catalogIdSuffix = catalogIdUnparsed.substring(catalogIdUnparsed.lastIndexOf("/") + 1);
-                if(catalogIdSuffix != null) {
-                    try {
-                        Bundle entryBundle = catalogService.getEntryDefinitions(catalogIdSuffix);
-                        Grid entryDefinitionGrid = buildEntryDefinitionGrid(catalogIdSuffix, entryBundle);
-                        content.addChild(entryDefinitionGrid);
-                    } catch(Exception e) {
-                        System.out.println("Error: " + e.getMessage());
-                        //TODO Popup a message that no entries could be retrieved from the catalog.
-                    }
-                }
-                tab.setClosable(true);
+                Row selectedRow = event.getTarget().getAncestor(Row.class);
+                Tab tab = buildCatalogDetailsTab(composition, selectedRow);
                 catalogTabView.addChild(tab);
             });
             action.addChild(viewDetailsBtn);
@@ -182,8 +158,33 @@ public class CatalogController implements IAutoWired {
         });
     }
 
+    protected Tab buildCatalogDetailsTab(Composition composition, Row selectedRow) {
+        Rowcell catalogIdCell = (Rowcell)selectedRow.getFirstChild();
+        Tab tab = new Tab(catalogIdCell.getLabel());
+        tab.setSelected(true);
+        Div content = new Div();
+        tab.addChild(content);
+        Groupbox catalogDetailsGroupbox = populateCatalogDetailsGroupbox(composition);
+        content.addChild(catalogDetailsGroupbox);
+        String catalogIdUnparsed = (String)catalogIdCell.getData();
+        String catalogIdSuffix = catalogIdUnparsed.substring(catalogIdUnparsed.lastIndexOf("/") + 1);
+        if(catalogIdSuffix != null) {
+            try {
+                Bundle entryBundle = catalogService.getEntryDefinitions(catalogIdSuffix);
+                Grid entryDefinitionGrid = buildEntryDefinitionGrid(catalogIdSuffix, entryBundle);
+                content.addChild(entryDefinitionGrid);
+            } catch(Exception e) {
+                System.out.println("Error: " + e.getMessage());
+                //TODO Popup a message that no entries could be retrieved from the catalog.
+            }
+        }
+        tab.setClosable(true);
+        return tab;
+    }
+
     public Groupbox populateCatalogDetailsGroupbox(Composition composition) {
         Groupbox groupbox = new Groupbox();
+        groupbox.addClass("catalog-details-group-box");
         groupbox.setTitle("Catalog Details");
         groupbox.addChild(buildLabelDiv("Title:", composition.getTitle()));
         groupbox.addChild(buildLabelDiv("ID:", composition.getId()));
@@ -285,19 +286,19 @@ public class CatalogController implements IAutoWired {
                 status.setColspan(1);
                 status.setLabel("" + entryDefinition.getStatus().getCodingFirstRep().getDisplay());
                 row.addChild(status);
-                //ActivityDef
+                //Item Name
                 Rowcell activityDefinitionName = new Rowcell();
                 activityDefinitionName.setRowspan(1);
                 activityDefinitionName.setColspan(1);
                 activityDefinitionName.setLabel(aa.getName());
                 row.addChild(activityDefinitionName);
-
+                //Item Code
                 Rowcell activityDefinitionCode = new Rowcell();
                 activityDefinitionCode.setRowspan(1);
                 activityDefinitionCode.setColspan(1);
                 activityDefinitionCode.setLabel(aa.getCode().getCodingFirstRep().getCode());
                 row.addChild(activityDefinitionCode);
-
+                //Action
                 Rowcell action = new Rowcell();
                 action.setRowspan(1);
                 action.setColspan(1);
@@ -308,24 +309,7 @@ public class CatalogController implements IAutoWired {
                     Row selectedRow = event.getTarget().getAncestor(Row.class);
                     Rowcell entryIdCell = (Rowcell)selectedRow.getChildAt(0);
                     String entryUrl = (String)entryIdCell.getData();
-                    String entryId = getIdFromGetUrl(entryUrl);
-                    if(entryId != null) {
-                        Bundle selectedEntryBundle = catalogService.getEntryDefinition(entryId);
-                        Map<String,Resource> bundledResourceIndex = new HashMap<String,Resource>();
-                        selectedEntryBundle.getEntry().forEach(bundleEntryComponent -> {
-                            Resource resource = bundleEntryComponent.getResource();
-                            bundledResourceIndex.put(resource.getId(),resource);
-                        });
-                        EntryDefinition selectedEntry = (EntryDefinition)bundledResourceIndex.get(entryUrl);
-                        System.out.println(selectedEntry);
-                        Tab entryDefinitionTab = new Tab("Entry Details - " + selectedEntry.getClassification().get(0).getCodingFirstRep().getDisplay());
-                        catalogTabView.addChild(entryDefinitionTab);
-                        Div entryDiv = populateEntryDetails(selectedEntry,bundledResourceIndex);
-                        entryDefinitionTab.addChild(entryDiv);
-                        entryDefinitionTab.setClosable(true);
-                        entryDefinitionTab.setSelected(true);
-
-                    }
+                    buildEntryDefinitionTab(entryUrl);
                 });
 
 
@@ -334,8 +318,34 @@ public class CatalogController implements IAutoWired {
         });
     }
 
+    protected void buildEntryDefinitionTab(String entryUrl) {
+        String entryId = getIdFromGetUrl(entryUrl);
+        if(entryId != null) {
+            Bundle selectedEntryBundle = catalogService.getEntryDefinition(entryId);
+            Map<String,Resource> bundledResourceIndex = new HashMap<String,Resource>();
+            selectedEntryBundle.getEntry().forEach(bundleEntryComponent -> {
+                Resource resource = bundleEntryComponent.getResource();
+                bundledResourceIndex.put(resource.getId(),resource);
+            });
+            EntryDefinition selectedEntry = (EntryDefinition)bundledResourceIndex.get(entryUrl);
+            System.out.println(selectedEntry);
+            Tab entryDefinitionTab = new Tab("Entry Details - " + selectedEntry.getClassification().get(0).getCodingFirstRep().getDisplay());
+            catalogTabView.addChild(entryDefinitionTab);
+            Div entryDiv = populateEntryDetails(selectedEntry,bundledResourceIndex);
+            entryDefinitionTab.addChild(entryDiv);
+            entryDefinitionTab.setClosable(true);
+            entryDefinitionTab.setSelected(true);
+        }
+    }
+
     /**
-     * Delete clinical requirement button handler
+     * Handler to retrieve catalog entries that match the search query by:
+     *
+     * Catalog ID
+     * Entry type
+     * Entry purpose
+     * Entry classification
+     *
      * @param event
      */
     @EventHandler(value = "click", target = "btnEntrySearch1") private void btnEntrySearch1ClickHandler(Event event) {
@@ -351,7 +361,13 @@ public class CatalogController implements IAutoWired {
     }
 
     /**
-     * Delete clinical requirement button handler
+     * Handler to retrieve catalog entries that match the search query by:
+     *
+     * Catalog ID
+     * Entry type
+     * Entry purpose
+     * Entry referenced item name
+     *
      * @param event
      */
     @EventHandler(value = "click", target = "btnEntrySearch2") private void btnEntrySearch2ClickHandler(Event event) {
@@ -405,26 +421,6 @@ public class CatalogController implements IAutoWired {
         type.setValue("diagnostic-service");
         serviceCombo.addChild(type);
     }
-
-//    public void populateClassificationCombo() {
-//        Comboitem blank = createBlankComboItem();
-//        blank.setSelected(true);
-//        cbClassificationDisplay.addChild(blank);
-//
-//        Comboitem classification = new Comboitem("chemistry");
-//        classification.setValue("chemistry");
-//        cbClassificationDisplay.addChild(classification);
-//    }
-
-//    public void populateActivityDefinitionNameCombo() {
-//        Comboitem blank = createBlankComboItem();
-//        blank.setSelected(true);
-//        cbActivityDefinitionName.addChild(blank);
-//
-//        Comboitem ActivityName = new Comboitem("sodium");
-//        ActivityName.setValue("sodium");
-//        cbActivityDefinitionName.addChild(ActivityName);
-//    }
 
     protected Div populateEntryDetails(EntryDefinition entryDefinition, Map<String,Resource> bundledResourceIndex) {
         Div entryDiv = new Div();
