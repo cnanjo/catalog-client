@@ -25,7 +25,7 @@ define('catalog-component', [
 		/*------------------------------ Rendering ------------------------------*/
 		
 		render$: function() {
-			return $('<label></label>');
+			return $('<div></div>');
 		}
 		
 		/*------------------------------ State ------------------------------*/

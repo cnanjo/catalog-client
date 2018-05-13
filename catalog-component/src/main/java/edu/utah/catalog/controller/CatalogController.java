@@ -151,10 +151,11 @@ public class CatalogController implements IAutoWired {
             action.setColspan(1);
             Button viewDetailsBtn = new Button("View Details");
             viewDetailsBtn.setName("viewCatalogDetailsBtn" + composition.getId().hashCode());
-            viewDetailsBtn.addEventListener("dblclick", event -> {
+            viewDetailsBtn.addEventListener("click", event -> {
                 Row selectedRow = (Row) event.getTarget().getParent().getParent();
                 Rowcell catalogIdCell = (Rowcell)selectedRow.getChildAt(0);
                 Tab tab = new Tab(catalogIdCell.getLabel());
+                tab.setSelected(true);
                 Div content = new Div();
                 tab.addChild(content);
                 Groupbox catalogDetailsGroupbox = populateCatalogDetailsGroupbox(composition);
@@ -173,7 +174,6 @@ public class CatalogController implements IAutoWired {
                     }
                 }
                 tab.setClosable(true);
-                tab.setSelected(false);
                 catalogTabView.addChild(tab);
             });
             action.addChild(viewDetailsBtn);
@@ -234,6 +234,7 @@ public class CatalogController implements IAutoWired {
         columns.addChild(new Column("status"));
         columns.addChild(new Column("Item Name"));
         columns.addChild(new Column("Loinc Code"));
+        columns.addChild(new Column("Action"));
         entryDefinitionGrid.addChild(columns);
         Rows rows = new Rows();
         populateEntryDefinitionGridRows(rows, catalogId, entryBundle);
@@ -251,30 +252,6 @@ public class CatalogController implements IAutoWired {
                 ActivityDefinition aa = (ActivityDefinition)contained.get(0);
 
                 Row row = new Row();
-
-                row.addEventListener("dblclick", event -> {
-                    Row selectedRow = (Row) event.getTarget().getParent();
-                    Rowcell entryIdCell = (Rowcell)selectedRow.getChildAt(0);
-                    String entryUrl = (String)entryIdCell.getData();
-                    String entryId = getIdFromGetUrl(entryUrl);
-                    if(entryId != null) {
-                        Bundle selectedEntryBundle = catalogService.getEntryDefinition(entryId);
-                        Map<String,Resource> bundledResourceIndex = new HashMap<String,Resource>();
-                        selectedEntryBundle.getEntry().forEach(bundleEntryComponent -> {
-                            Resource resource = bundleEntryComponent.getResource();
-                            bundledResourceIndex.put(resource.getId(),resource);
-                        });
-                        EntryDefinition selectedEntry = (EntryDefinition)bundledResourceIndex.get(entryUrl);
-                        System.out.println(selectedEntry);
-                        Tab entryDefinitionTab = new Tab("Entry Details - " + selectedEntry.getClassification().get(0).getCodingFirstRep().getDisplay());
-                        catalogTabView.addChild(entryDefinitionTab);
-                        Div entryDiv = populateEntryDetails(selectedEntry,bundledResourceIndex);
-                        entryDefinitionTab.addChild(entryDiv);
-                        entryDefinitionTab.setClosable(true);
-                        entryDefinitionTab.setSelected(true);
-
-                    }
-                });
 
                 //ID
                 Rowcell id = new Rowcell();
@@ -321,6 +298,36 @@ public class CatalogController implements IAutoWired {
                 activityDefinitionCode.setLabel(aa.getCode().getCodingFirstRep().getCode());
                 row.addChild(activityDefinitionCode);
 
+                Rowcell action = new Rowcell();
+                action.setRowspan(1);
+                action.setColspan(1);
+                Button button = new Button("View Details");
+                row.addChild(button);
+
+                button.addEventListener("click", event -> {
+                    Row selectedRow = event.getTarget().getAncestor(Row.class);
+                    Rowcell entryIdCell = (Rowcell)selectedRow.getChildAt(0);
+                    String entryUrl = (String)entryIdCell.getData();
+                    String entryId = getIdFromGetUrl(entryUrl);
+                    if(entryId != null) {
+                        Bundle selectedEntryBundle = catalogService.getEntryDefinition(entryId);
+                        Map<String,Resource> bundledResourceIndex = new HashMap<String,Resource>();
+                        selectedEntryBundle.getEntry().forEach(bundleEntryComponent -> {
+                            Resource resource = bundleEntryComponent.getResource();
+                            bundledResourceIndex.put(resource.getId(),resource);
+                        });
+                        EntryDefinition selectedEntry = (EntryDefinition)bundledResourceIndex.get(entryUrl);
+                        System.out.println(selectedEntry);
+                        Tab entryDefinitionTab = new Tab("Entry Details - " + selectedEntry.getClassification().get(0).getCodingFirstRep().getDisplay());
+                        catalogTabView.addChild(entryDefinitionTab);
+                        Div entryDiv = populateEntryDetails(selectedEntry,bundledResourceIndex);
+                        entryDefinitionTab.addChild(entryDiv);
+                        entryDefinitionTab.setClosable(true);
+                        entryDefinitionTab.setSelected(true);
+
+                    }
+                });
+
 
                 rows.addChild(row);
             }
@@ -331,7 +338,7 @@ public class CatalogController implements IAutoWired {
      * Delete clinical requirement button handler
      * @param event
      */
-    @EventHandler(value = "dblclick", target = "btnEntrySearch1") private void btnEntrySearch1ClickHandler(Event event) {
+    @EventHandler(value = "click", target = "btnEntrySearch1") private void btnEntrySearch1ClickHandler(Event event) {
         Map<String,String> parameters = new HashMap<>();
         String catalogId = cbCatalog1.getSelectedItem().getValue();
         parameters.put(CatalogService.SEARCH_PARAMETER_TYPE, cbEntryDefType1.getSelectedItem().getValue());
@@ -347,7 +354,7 @@ public class CatalogController implements IAutoWired {
      * Delete clinical requirement button handler
      * @param event
      */
-    @EventHandler(value = "dblclick", target = "btnEntrySearch2") private void btnEntrySearch2ClickHandler(Event event) {
+    @EventHandler(value = "click", target = "btnEntrySearch2") private void btnEntrySearch2ClickHandler(Event event) {
         Map<String,String> parameters = new HashMap<>();
         String catalogId = cbCatalog2.getSelectedItem().getValue();
         parameters.put(CatalogService.SEARCH_PARAMETER_TYPE, cbEntryDefType2.getSelectedItem().getValue());

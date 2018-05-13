@@ -1,6 +1,6 @@
 <catalogcomponent controller="${@catalogController}">
     <tabview name="catalogTabView" width="100%" height="1000px" tabPosition="TOP">
-        <tab name="catalogBrowserTab" label="Catalog Browser">
+        <tab name="catalogBrowserTab" selected="true" label="Catalog Browser">
             <div>
                 <grid name="catalogGrid"></grid>
             </div>
